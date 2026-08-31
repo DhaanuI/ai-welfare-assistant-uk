@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# env — block real secrets, but keep the template that documents required vars
+.env
+.env*.local
+!.env.example
