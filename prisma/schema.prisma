@@ -1,0 +1,134 @@
+// Prisma schema — AI Welfare Assistant
+// Postgres. One StaffUser table, plus the conversation / message / triage / case chain.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Category {
+  academic
+  financial
+  visa_immigration
+  housing
+  health_wellbeing
+  other
+}
+
+enum Urgency {
+  low
+  medium
+  high
+  critical
+}
+
+enum Disposition {
+  handle_now
+  clarify
+  escalate
+}
+
+enum ConversationStatus {
+  active
+  escalated
+  closed
+}
+
+enum MessageRole {
+  student
+  assistant
+  system
+}
+
+enum CaseStatus {
+  new
+  in_progress
+  resolved
+}
+
+model StaffUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  claimedCases Case[]
+}
+
+model Conversation {
+  id           String             @id @default(cuid())
+  studentName  String?
+  studentEmail String?
+  status       ConversationStatus @default(active)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  messages      Message[]
+  triageResults TriageResult[]
+  case          Case?
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String
+  createdAt      DateTime    @default(now())
+
+  triageResult TriageResult?
+
+  @@index([conversationId])
+}
+
+// One row per inbound student message that we triaged.
+model TriageResult {
+  id             String      @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  messageId      String      @unique
+  message        Message     @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  category     Category
+  urgency      Urgency
+  safeguarding Boolean
+  disposition  Disposition
+
+  // Was the model call itself OK? false => we used the safe fallback.
+  modelOk       Boolean
+  // Which deterministic house rules fired, for auditability.
+  appliedRules  String[]
+  reasoning     String?
+  rawModel      Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+}
+
+model Case {
+  id             String      @id @default(cuid())
+  conversationId String      @unique
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  summary      String
+  category     Category
+  urgency      Urgency
+  safeguarding Boolean
+  status       CaseStatus  @default(new)
+
+  claimedById String?
+  claimedBy   StaffUser? @relation(fields: [claimedById], references: [id])
+  claimedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([safeguarding, urgency])
+}
