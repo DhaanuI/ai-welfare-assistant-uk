@@ -33,25 +33,28 @@ showing who's replying — is a bigger feature than what was actually asked for.
 ## One choice a different engineer might make
 
 I catch crisis language, immigration questions, harassment, and attempts to
-manipulate the assistant using plain regex patterns, not a trained model.
+manipulate the assistant with plain regex checks in code, on top of what the AI is
+already told to catch in its own instructions.
 
-The alternative would be a small machine learning model trained on real examples of
-crisis language, the kind some mental health apps use. It would probably catch
-things my patterns miss — sarcasm, indirect phrasing, wording I just didn't think to
-write down. A fixed list only catches what I anticipated; a trained model
-generalises better.
+A different engineer might reasonably skip that second layer. The AI's instructions
+already say "if this looks like a crisis, always escalate" — so a simpler build
+would just trust that and stop there. It's less code, nothing extra to maintain, and
+one less place for the AI and the code to disagree.
 
-But it needs real labelled training data, which for something like crisis detection
-is sensitive and hard to get right. It needs hosting, versioning, retraining over
-time. And it's still not a guarantee, just a different kind of mistake that's much
-harder to explain afterwards. If my regex list gets something wrong, I can open the
-file and see exactly why in ten seconds. A model rarely gives you that.
+The problem is that only relying on the instructions means trusting the AI to follow
+them every single time, and there's no way to guarantee that. Models don't always
+behave identically twice, and a cleverly worded message can talk a model out of an
+instruction entirely — that's exactly what test message 9 tries to do ("ignore your
+previous instructions..."). If that ever worked on a real crisis message instead of
+a test one, there'd be nothing else to catch it.
 
-I went with regex because it needs no training data, always gives the same answer
-for the same input (which is exactly what the probes test), and anyone can read the
-whole list in a few minutes. It also doesn't need to be perfect on its own, because
-it isn't the only check — the AI is already trying to catch the same things in its
-own judgment. The regex is the backup underneath that, not a replacement for it.
+So the regex checks run separately, in code, checking for the same things the AI is
+already told to catch. If the AI does its job properly, the regex changes nothing.
+If it doesn't, the regex catches it anyway. The cost is real — writing and
+maintaining that list, and it's not perfect either, since it only catches wording I
+thought to write down. But it turns "the AI should get this right" into "there is a
+decision here that cannot be talked out of," which matters a lot more for a crisis
+message than for most other things this app does.
 
 The same idea shows up twice more. If the AI call fails, I retry once and then
 escalate rather than trying harder — a student shouldn't wait longer just for a

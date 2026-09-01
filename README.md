@@ -117,11 +117,13 @@ A few things, roughly in the order I'd worry about them:
 - Staff access needs approval, not open signup.
 - Conversations should be encrypted at rest, and deleted after some retention period
   instead of kept forever.
-- The AI provider needs a proper data agreement — a guarantee they're not training on
-  our data, and we should send them the minimum needed, not the full history every
-  time.
+- Use a local, open-weight model (something like Llama) hosted on our own servers,
+  instead of sending student data to a third-party AI company at all. Welfare data —
+  mental health disclosures, immigration status — shouldn't leave our own
+  infrastructure if we can help it. It costs more to run and the model quality is a
+  step behind something like Gemini, which is why this build uses Gemini's free
+  tier, but for real student data it's the better call.
 - The public chat page needs rate limiting so it can't be spammed.
-- Students should be told plainly, on first use, what this is and what it stores.
 
 **In two or three sentences a non-technical colleague would understand, how does the
 assistant decide what to answer itself and what to escalate?**
