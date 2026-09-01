@@ -9,7 +9,7 @@
 
 import { z } from "zod";
 import type { Category, Disposition, Urgency } from "@prisma/client";
-import { generateJson, generateText, REPLY_MODEL, TRIAGE_MODEL, ModelUnavailableError } from "./gemini";
+import { generateJson, generateText, GEMINI_MODEL, ModelUnavailableError } from "./gemini";
 import { runSafetyChecks, EMERGENCY_SUPPORT_TEXT, type SafetySignals } from "./safety";
 import {
   knowledgeBaseIndex,
@@ -181,7 +181,7 @@ export async function triageMessage(
   try {
     const user = `Conversation so far:\n${renderHistory(history)}\n\nNew student message to triage:\n"""${message}"""`;
     const raw = await generateJson<unknown>({
-      model: TRIAGE_MODEL,
+      model: GEMINI_MODEL,
       system: TRIAGE_SYSTEM,
       user,
       schema: GEMINI_TRIAGE_SCHEMA,
@@ -314,7 +314,7 @@ export async function generateReply(
     if (outcome.clarifyingQuestion) return outcome.clarifyingQuestion;
     try {
       return await generateText({
-        model: REPLY_MODEL,
+        model: GEMINI_MODEL,
         system:
           REPLY_SYSTEM_BASE +
           "\nThe request is too vague to answer or route safely, and there is no sign of danger. Ask one or two specific, relevant questions to understand what they need. Keep it to a couple of sentences.",
@@ -330,7 +330,7 @@ export async function generateReply(
     let body: string;
     try {
       body = await generateText({
-        model: REPLY_MODEL,
+        model: GEMINI_MODEL,
         system:
           REPLY_SYSTEM_BASE +
           "\nThis case is going to a member of the team, who will follow up by email. Tell the student that clearly and warmly in two or three sentences. Do not promise a timeframe. Do not attempt to resolve the issue yourself. If earlier context gives an obviously safe, relevant pointer you may mention it briefly, but the main message is that a person will be in touch.",
@@ -351,7 +351,7 @@ export async function generateReply(
 
   try {
     return await generateText({
-      model: REPLY_MODEL,
+      model: GEMINI_MODEL,
       system:
         REPLY_SYSTEM_BASE +
         "\nAnswer the student's question now, grounded ONLY in the resources below. Give a clear, personal answer and point them to the most relevant resource by name. If none of the resources genuinely fit, say you'll pass it to a person instead.\n\n" +

@@ -8,8 +8,7 @@ if (!apiKey) {
 
 export const ai = new GoogleGenAI({ apiKey: apiKey ?? "" });
 
-export const TRIAGE_MODEL = process.env.GEMINI_TRIAGE_MODEL || "gemini-2.5-flash-lite";
-export const REPLY_MODEL = process.env.GEMINI_REPLY_MODEL || "gemini-2.5-flash-lite";
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
 
 export class ModelUnavailableError extends Error {
   constructor(message: string, readonly cause?: unknown) {
