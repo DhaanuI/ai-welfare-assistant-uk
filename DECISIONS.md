@@ -24,9 +24,23 @@ probes.** All sensible, none load-bearing for a "working core built well" at thi
 scale. The reply is returned in one response; the model call has a timeout and a
 single retry.
 
-**Staff identity beyond a shared seeded login.** There is a `StaffUser` table and JWT
-sessions, but no invite flow or SSO. Two staff users are seeded so the concurrent
-claim can be demonstrated.
+**Staff identity beyond open self-serve signup.** `/staff/signup` creates a
+`StaffUser` with a JWT session — real login, not a shared demo account — but signup
+is open to anyone with the URL, with no invite, approval, or domain restriction. That
+is the wrong shape for a real welfare desk (anyone who finds the link can see every
+student's conversation); in production this would be invite-only or SSO, with new
+accounts sitting `pending` until an existing admin approves them. `npm run seed` still
+exists alongside it as a convenience for demonstrating the concurrent claim with two
+accounts.
+
+**A channel for a staff member's reply to reach the student inside the chat.** Staff
+can view the full conversation, claim a case, and move it through status, but there is
+no in-app messaging back to the student — the assistant tells them "a member of the
+team will follow up by email," and that follow-up genuinely happens out of band, by
+email, not through this UI. Building two-way in-chat messaging (delivery, read
+state, staff identity shown to the student, notifying the student a reply arrived)
+is a meaningfully bigger feature than the dashboard the brief asks for, so it's
+scoped out — but it's a real product gap worth naming, not an oversight.
 
 ## A decision a reasonable engineer would make differently
 

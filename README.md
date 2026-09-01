@@ -75,7 +75,26 @@ saved to Postgres (`prisma/schema.prisma`).
    ```
 
    - Student chat: <http://localhost:3000/chat>
-   - Staff dashboard: <http://localhost:3000/staff> (sign in with the seeded staff account)
+   - Staff dashboard: <http://localhost:3000/staff> — create your own account at
+     `/staff/signup`, or sign in with the account `npm run seed` creates
+     (`STAFF_EMAIL` / `STAFF_PASSWORD` from `.env`).
+
+## Staff accounts
+
+`/staff/signup` is open self-serve signup: name, work email, password (min. 8
+characters) — the same shape as the student side, so a reviewer can get into the
+dashboard without needing seeded credentials. `npm run seed` still exists as a
+convenience for quickly getting two staff accounts to demonstrate the concurrent
+claim (see `DECISIONS.md`).
+
+**Production note:** open signup is the wrong shape for a real welfare desk — anyone
+who finds the URL can currently create an account with access to every student's
+conversation. In production this would be invite-only (an existing admin sends a
+signup link tied to one email) or gated behind SSO with domain restriction, and new
+accounts would sit in a `pending` state requiring an existing admin to approve them
+before they can see any case — the same "when in doubt, escalate to a human"
+principle the assistant itself follows, applied to who gets access in the first
+place.
 
 ## Safety probes
 
